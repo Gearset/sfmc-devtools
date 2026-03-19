@@ -8,12 +8,16 @@ on:
         types: [published]
     workflow_dispatch:
 
+permissions:
+    id-token: write # Required for OIDC
+    contents: read
+
 jobs:
     build:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+            - uses: actions/checkout@v6
+            - uses: actions/setup-node@v6
               with:
                   node-version-file: ./package.json
 
@@ -27,8 +31,8 @@ jobs:
             contents: read
             packages: write
         steps:
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+            - uses: actions/checkout@v6
+            - uses: actions/setup-node@v6
               with:
                   node-version-file: ./package.json
                   registry-url: 'https://npm.pkg.github.com'
@@ -36,9 +40,9 @@ jobs:
             - run: npm ci
             - name: Set version to release tag
               run: |
-                if [ ${{github.event_name == 'release'}} ]; then
-                    npm --no-git-tag-version version ${{ github.event.release.tag_name }}
-                fi
+                  if [ ${{github.event_name == 'release'}} ]; then
+                      npm --no-git-tag-version version ${{ github.event.release.tag_name }}
+                  fi
             - run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
